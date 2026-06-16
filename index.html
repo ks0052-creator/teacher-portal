@@ -1,0 +1,218 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>계성고 담임 출결 관리</title>
+  <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+  <main class="shell">
+    <section id="loginView" class="panel auth-panel">
+      <div class="brand-row">
+        <div>
+          <p class="eyebrow">Keisung High School</p>
+          <h1>담임 출결 관리</h1>
+        </div>
+      </div>
+
+      <form id="loginForm" class="login-form">
+        <label>
+          <span>아이디</span>
+          <input id="emailInput" type="text" autocomplete="username" required>
+        </label>
+        <label>
+          <span>비밀번호</span>
+          <input id="passwordInput" type="password" autocomplete="current-password" required>
+        </label>
+        <button type="submit" class="primary-button">로그인</button>
+        <p id="loginMessage" class="message" aria-live="polite"></p>
+      </form>
+    </section>
+
+    <section id="appView" class="app-view hidden">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">Keisung High School</p>
+          <h1>담임 출결 관리</h1>
+          <p id="scopeText" class="scope-text"></p>
+        </div>
+        <div class="topbar-actions">
+          <button id="passwordDialogOpenButton" class="ghost-button" type="button">비밀번호 변경</button>
+          <button id="logoutButton" class="ghost-button" type="button">로그아웃</button>
+        </div>
+      </header>
+
+      <section class="toolbar panel">
+        <label class="select-label">
+          <span>반</span>
+          <select id="classFilter"></select>
+        </label>
+        <div class="period-label">
+          <span>월별</span>
+          <div id="periodPresetGroup" class="period-presets" aria-label="월별 기간"></div>
+        </div>
+        <label class="date-label">
+          <span>시작일</span>
+          <input id="startDateInput" type="date">
+        </label>
+        <label class="date-label">
+          <span>종료일</span>
+          <input id="endDateInput" type="date">
+        </label>
+        <button id="reloadButton" class="primary-button" type="button">조회</button>
+      </section>
+
+      <section class="summary-grid" aria-label="요약">
+        <article class="summary-card needs">
+          <span>확인 필요</span>
+          <strong id="needsCount">0</strong>
+        </article>
+        <article class="summary-card excused">
+          <span>외출 확인</span>
+          <strong id="excusedCount">0</strong>
+        </article>
+        <article class="summary-card total">
+          <span>전체 기록</span>
+          <strong id="totalCount">0</strong>
+        </article>
+        <button id="studentListButton" class="summary-card summary-button students" type="button">
+          <span>대상 학생</span>
+          <strong id="studentCount">0</strong>
+        </button>
+      </section>
+
+      <section class="content-grid">
+        <section id="classSummaryPanel" class="panel table-panel class-summary-panel">
+          <div class="section-head">
+            <h2>반별 요약</h2>
+            <p id="classSummaryMeta"></p>
+          </div>
+          <div id="classSummaryChart" class="class-summary-chart"></div>
+          <div class="table-wrap compact-table class-summary-table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>반</th>
+                  <th>확인 필요</th>
+                  <th>외출 확인</th>
+                  <th>합계</th>
+                  <th>학생</th>
+                </tr>
+              </thead>
+              <tbody id="classSummaryBody"></tbody>
+            </table>
+          </div>
+          <div id="gradeLeadRankingActions" class="grade-lead-ranking-actions hidden">
+            <button id="rankingToggleButton" class="ghost-button" type="button">전체 학생별 누적 보기</button>
+          </div>
+        </section>
+
+        <section id="rankingPanel" class="panel table-panel ranking-panel">
+          <div class="section-head">
+            <div>
+              <h2 id="rankingTitle">학생별 누적</h2>
+              <p id="rankingMeta"></p>
+            </div>
+          </div>
+          <div class="table-wrap compact-table ranking-table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>순번</th>
+                  <th><button class="table-sort-button" type="button" data-ranking-sort="student">학생</button></th>
+                  <th><button class="table-sort-button" type="button" data-ranking-sort="needs">확인 필요</button></th>
+                  <th><button class="table-sort-button" type="button" data-ranking-sort="excused">외출 확인</button></th>
+                  <th><button class="table-sort-button" type="button" data-ranking-sort="total">합계</button></th>
+                </tr>
+              </thead>
+              <tbody id="rankingBody"></tbody>
+            </table>
+          </div>
+          <p id="rankingEmpty" class="empty hidden">조회된 기록이 없습니다.</p>
+          <div id="rankingMoreActions" class="ranking-more-actions hidden">
+            <button id="rankingMoreButton" class="ghost-button" type="button">30명 더 보기</button>
+          </div>
+        </section>
+      </section>
+
+      <section class="panel records-panel">
+        <div class="section-head">
+          <div>
+            <h2 id="recordsTitle">상세 기록</h2>
+            <p id="recordsMeta"></p>
+          </div>
+          <button id="clearSelectedStudentButton" class="ghost-button compact-button hidden" type="button">전체 해제</button>
+        </div>
+        <div id="selectedStudentSummary" class="selected-student-summary hidden"></div>
+        <div id="recordsTableWrap" class="table-wrap hidden">
+          <table>
+            <thead>
+              <tr>
+                <th>날짜</th>
+                <th>반</th>
+                <th>번호</th>
+                <th>이름</th>
+                <th>상태</th>
+                <th>외출증</th>
+                <th>결석 교시</th>
+                <th>KSOS 사유</th>
+                <th>From</th>
+                <th>To</th>
+                <th>교사</th>
+              </tr>
+            </thead>
+            <tbody id="recordsBody"></tbody>
+          </table>
+        </div>
+        <p id="recordsEmpty" class="empty hidden">조회된 기록이 없습니다.</p>
+        <p id="appMessage" class="message" aria-live="polite"></p>
+      </section>
+    </section>
+
+    <dialog id="studentDialog" class="student-dialog">
+      <div class="dialog-head">
+        <div>
+          <h2 id="studentDialogTitle">대상 학생</h2>
+          <p id="studentDialogMeta"></p>
+        </div>
+        <div class="dialog-actions">
+          <button id="studentDialogBack" class="ghost-button hidden" type="button">목록</button>
+          <button id="studentDialogClose" class="ghost-button" type="button">닫기</button>
+        </div>
+      </div>
+      <div id="studentDialogContent" class="student-dialog-content"></div>
+    </dialog>
+
+    <dialog id="passwordDialog" class="password-dialog">
+      <div class="dialog-head">
+        <div>
+          <h2>비밀번호 변경</h2>
+          <p>새 비밀번호는 8자 이상으로 입력해 주세요.</p>
+        </div>
+        <button id="passwordDialogCloseButton" class="ghost-button compact-button" type="button">닫기</button>
+      </div>
+      <form id="passwordForm" class="password-form password-dialog-form">
+        <label>
+          <span>현재 비밀번호</span>
+          <input id="currentPasswordInput" type="password" autocomplete="current-password" required>
+        </label>
+        <label>
+          <span>새 비밀번호</span>
+          <input id="newPasswordInput" type="password" autocomplete="new-password" required>
+        </label>
+        <label>
+          <span>새 비밀번호 확인</span>
+          <input id="confirmPasswordInput" type="password" autocomplete="new-password" required>
+        </label>
+        <button type="submit" class="primary-button">변경</button>
+      </form>
+      <p id="passwordMessage" class="message" aria-live="polite"></p>
+    </dialog>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="./config.js"></script>
+  <script src="./app.js"></script>
+</body>
+</html>
