@@ -238,15 +238,22 @@ function hasKsosOutingData(row) {
   ].some((value) => String(value || "").trim());
 }
 
+function hasTeacherSplitColumns(row) {
+  return Object.prototype.hasOwnProperty.call(row || {}, "riro_teacher_name") ||
+    Object.prototype.hasOwnProperty.call(row || {}, "ksos_teacher_name");
+}
+
 function riroTeacherName(row) {
   const explicit = String(row?.riro_teacher_name || "").trim();
   if (explicit) return explicit;
+  if (hasTeacherSplitColumns(row)) return "";
   return hasKsosOutingData(row) ? "" : String(row?.teacher_name || "").trim();
 }
 
 function ksosTeacherName(row) {
   const explicit = String(row?.ksos_teacher_name || "").trim();
   if (explicit) return explicit;
+  if (hasTeacherSplitColumns(row)) return "";
   return hasKsosOutingData(row) ? String(row?.teacher_name || "").trim() : "";
 }
 
