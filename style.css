@@ -703,7 +703,7 @@ select:disabled {
 }
 
 .class-detail-panel .table-wrap table {
-  min-width: 980px;
+  min-width: 1120px;
 }
 
 .homeroom-view .class-summary-table-wrap {
@@ -873,7 +873,7 @@ select:disabled {
 
 table {
   width: 100%;
-  min-width: 980px;
+  min-width: 1120px;
   border-collapse: collapse;
   background: #fff;
 }

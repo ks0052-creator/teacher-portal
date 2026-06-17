@@ -227,6 +227,29 @@ function resolvedCertificate(row) {
   return hasKsosOuting ? "보유" : "미보유";
 }
 
+function hasKsosOutingData(row) {
+  return [
+    row?.ksos_teacher_name,
+    row?.ksos_reason,
+    row?.ksos_from_text,
+    row?.ksos_to_text,
+    row?.outing_from,
+    row?.outing_to,
+  ].some((value) => String(value || "").trim());
+}
+
+function riroTeacherName(row) {
+  const explicit = String(row?.riro_teacher_name || "").trim();
+  if (explicit) return explicit;
+  return hasKsosOutingData(row) ? "" : String(row?.teacher_name || "").trim();
+}
+
+function ksosTeacherName(row) {
+  const explicit = String(row?.ksos_teacher_name || "").trim();
+  if (explicit) return explicit;
+  return hasKsosOutingData(row) ? String(row?.teacher_name || "").trim() : "";
+}
+
 function certificateClass(value) {
   if (value === "보유") return "certificate-badge certificate-has";
   if (value === "미보유") return "certificate-badge certificate-missing";
@@ -799,7 +822,8 @@ function recordTableRowsHtml(rows) {
         <td>${escapeHtml(row.ksos_reason || "-")}</td>
         <td>${escapeHtml(formatRawTime(row.ksos_from_text, row.outing_from))}</td>
         <td>${escapeHtml(formatRawTime(row.ksos_to_text, row.outing_to))}</td>
-        <td>${escapeHtml(row.teacher_name || "-")}</td>
+        <td>${escapeHtml(riroTeacherName(row) || "-")}</td>
+        <td>${escapeHtml(ksosTeacherName(row) || "-")}</td>
       </tr>
     `;
   }).join("");
@@ -908,7 +932,8 @@ function renderRecords(results) {
         <td>${escapeHtml(row.ksos_reason || "-")}</td>
         <td>${escapeHtml(formatRawTime(row.ksos_from_text, row.outing_from))}</td>
         <td>${escapeHtml(formatRawTime(row.ksos_to_text, row.outing_to))}</td>
-        <td>${escapeHtml(row.teacher_name || "-")}</td>
+        <td>${escapeHtml(riroTeacherName(row) || "-")}</td>
+        <td>${escapeHtml(ksosTeacherName(row) || "-")}</td>
       </tr>
     `;
   }).join("");
@@ -973,7 +998,7 @@ async function loadResults() {
 
   let { data, error } = await supabaseClient
     .from("daily_results")
-    .select("result_date, status, absence_periods, ksos_certificate, ksos_reason, ksos_from_text, ksos_to_text, outing_from, outing_to, teacher_name, student:students(id, grade, class_no, student_no, name)")
+    .select("result_date, status, absence_periods, ksos_certificate, ksos_reason, ksos_from_text, ksos_to_text, outing_from, outing_to, riro_teacher_name, ksos_teacher_name, teacher_name, student:students(id, grade, class_no, student_no, name)")
     .gte("result_date", startDate)
     .lte("result_date", endDate)
     .order("result_date", { ascending: false })
@@ -983,7 +1008,9 @@ async function loadResults() {
     error &&
     (String(error.message || "").includes("ksos_certificate") ||
       String(error.message || "").includes("ksos_from_text") ||
-      String(error.message || "").includes("ksos_to_text"))
+      String(error.message || "").includes("ksos_to_text") ||
+      String(error.message || "").includes("riro_teacher_name") ||
+      String(error.message || "").includes("ksos_teacher_name"))
   ) {
     ({ data, error } = await supabaseClient
       .from("daily_results")
