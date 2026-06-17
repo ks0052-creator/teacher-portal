@@ -704,7 +704,8 @@ select:disabled {
 
 .class-detail-panel .table-wrap table,
 #recordsTableWrap table {
-  min-width: 1280px;
+  max-width: 100%;
+  min-width: 0;
   table-layout: fixed;
 }
 
@@ -909,6 +910,14 @@ tbody tr:last-child td {
   white-space: nowrap;
 }
 
+.class-detail-panel .table-wrap th,
+.class-detail-panel .table-wrap td,
+#recordsTableWrap th,
+#recordsTableWrap td {
+  padding-right: 8px;
+  padding-left: 8px;
+}
+
 .class-detail-panel .table-wrap td,
 #recordsTableWrap td {
   overflow-wrap: anywhere;
@@ -920,21 +929,21 @@ tbody tr:last-child td {
 .class-detail-panel .table-wrap td:nth-child(1),
 #recordsTableWrap th:nth-child(1),
 #recordsTableWrap td:nth-child(1) {
-  width: 104px;
+  width: 92px;
 }
 
 .class-detail-panel .table-wrap th:nth-child(2),
 .class-detail-panel .table-wrap td:nth-child(2),
 #recordsTableWrap th:nth-child(2),
 #recordsTableWrap td:nth-child(2) {
-  width: 66px;
+  width: 56px;
 }
 
 .class-detail-panel .table-wrap th:nth-child(3),
 .class-detail-panel .table-wrap td:nth-child(3),
 #recordsTableWrap th:nth-child(3),
 #recordsTableWrap td:nth-child(3) {
-  width: 50px;
+  width: 44px;
   text-align: center;
 }
 
@@ -942,28 +951,28 @@ tbody tr:last-child td {
 .class-detail-panel .table-wrap td:nth-child(4),
 #recordsTableWrap th:nth-child(4),
 #recordsTableWrap td:nth-child(4) {
-  width: 82px;
+  width: 72px;
 }
 
 .class-detail-panel .table-wrap th:nth-child(5),
 .class-detail-panel .table-wrap td:nth-child(5),
 #recordsTableWrap th:nth-child(5),
 #recordsTableWrap td:nth-child(5) {
-  width: 104px;
+  width: 92px;
 }
 
 .class-detail-panel .table-wrap th:nth-child(6),
 .class-detail-panel .table-wrap td:nth-child(6),
 #recordsTableWrap th:nth-child(6),
 #recordsTableWrap td:nth-child(6) {
-  width: 88px;
+  width: 80px;
 }
 
 .class-detail-panel .table-wrap th:nth-child(7),
 .class-detail-panel .table-wrap td:nth-child(7),
 #recordsTableWrap th:nth-child(7),
 #recordsTableWrap td:nth-child(7) {
-  width: 120px;
+  width: 104px;
 }
 
 .class-detail-panel .table-wrap td:nth-child(1),
@@ -988,7 +997,7 @@ tbody tr:last-child td {
 .class-detail-panel .table-wrap td:nth-child(8),
 #recordsTableWrap th:nth-child(8),
 #recordsTableWrap td:nth-child(8) {
-  width: 118px;
+  width: 92px;
 }
 
 .class-detail-panel .table-wrap th:nth-child(9),
@@ -999,21 +1008,21 @@ tbody tr:last-child td {
 #recordsTableWrap td:nth-child(9),
 #recordsTableWrap th:nth-child(10),
 #recordsTableWrap td:nth-child(10) {
-  width: 74px;
+  width: 64px;
 }
 
 .class-detail-panel .table-wrap th:nth-child(11),
 .class-detail-panel .table-wrap td:nth-child(11),
 #recordsTableWrap th:nth-child(11),
 #recordsTableWrap td:nth-child(11) {
-  width: 140px;
+  width: 118px;
 }
 
 .class-detail-panel .table-wrap th:nth-child(12),
 .class-detail-panel .table-wrap td:nth-child(12),
 #recordsTableWrap th:nth-child(12),
 #recordsTableWrap td:nth-child(12) {
-  width: 128px;
+  width: 108px;
 }
 
 .num {
