@@ -52,6 +52,10 @@
           <span>월별</span>
           <div id="periodPresetGroup" class="period-presets" aria-label="월별 기간"></div>
         </div>
+        <label class="date-label single-date-label">
+          <span>날짜</span>
+          <input id="singleDateInput" type="date">
+        </label>
         <label class="date-label">
           <span>시작일</span>
           <input id="startDateInput" type="date">
@@ -134,6 +138,36 @@
             <button id="rankingMoreButton" class="ghost-button" type="button">30명 더 보기</button>
           </div>
         </section>
+      </section>
+
+      <section id="classDetailPanel" class="panel records-panel class-detail-panel hidden">
+        <div class="section-head">
+          <div>
+            <h2 id="classDetailTitle">반별 상세 내역</h2>
+            <p id="classDetailMeta"></p>
+          </div>
+        </div>
+        <div id="classDetailTableWrap" class="table-wrap hidden">
+          <table>
+            <thead>
+              <tr>
+                <th>날짜</th>
+                <th>반</th>
+                <th>번호</th>
+                <th>이름</th>
+                <th>상태</th>
+                <th>외출증</th>
+                <th>결석 교시</th>
+                <th>KSOS 사유</th>
+                <th>From</th>
+                <th>To</th>
+                <th>교사</th>
+              </tr>
+            </thead>
+            <tbody id="classDetailBody"></tbody>
+          </table>
+        </div>
+        <p id="classDetailEmpty" class="empty hidden">반별 요약에서 반을 선택해 주세요.</p>
       </section>
 
       <section class="panel records-panel">

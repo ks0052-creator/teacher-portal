@@ -10,6 +10,7 @@ const logoutButton = document.querySelector("#logoutButton");
 const scopeText = document.querySelector("#scopeText");
 const classFilter = document.querySelector("#classFilter");
 const periodPresetGroup = document.querySelector("#periodPresetGroup");
+const singleDateInput = document.querySelector("#singleDateInput");
 const startDateInput = document.querySelector("#startDateInput");
 const endDateInput = document.querySelector("#endDateInput");
 const reloadButton = document.querySelector("#reloadButton");
@@ -50,6 +51,12 @@ const selectedStudentSummary = document.querySelector("#selectedStudentSummary")
 const recordsTableWrap = document.querySelector("#recordsTableWrap");
 const recordsBody = document.querySelector("#recordsBody");
 const recordsEmpty = document.querySelector("#recordsEmpty");
+const classDetailPanel = document.querySelector("#classDetailPanel");
+const classDetailTitle = document.querySelector("#classDetailTitle");
+const classDetailMeta = document.querySelector("#classDetailMeta");
+const classDetailTableWrap = document.querySelector("#classDetailTableWrap");
+const classDetailBody = document.querySelector("#classDetailBody");
+const classDetailEmpty = document.querySelector("#classDetailEmpty");
 const appMessage = document.querySelector("#appMessage");
 
 let supabaseClient = null;
@@ -139,11 +146,19 @@ function renderPeriodPresets() {
   }).join("");
 }
 
+function syncSingleDateFromRange() {
+  if (!singleDateInput) return;
+  const start = startDateInput.value;
+  const end = endDateInput.value;
+  singleDateInput.value = start && start === end ? start : "";
+}
+
 function syncPeriodPreset() {
   const start = startDateInput.value;
   const end = endDateInput.value;
   const matched = periodPresets().find((preset) => preset.start === start && preset.end === end);
   activePeriodKey = matched?.key || "custom";
+  syncSingleDateFromRange();
   renderPeriodPresets();
 }
 
@@ -153,6 +168,16 @@ async function applyPeriodPreset(periodKey) {
   activePeriodKey = preset.key;
   startDateInput.value = preset.start;
   endDateInput.value = preset.end;
+  syncSingleDateFromRange();
+  renderPeriodPresets();
+  await loadResults();
+}
+
+async function applySingleDate() {
+  if (!singleDateInput?.value) return;
+  activePeriodKey = "custom";
+  startDateInput.value = singleDateInput.value;
+  endDateInput.value = singleDateInput.value;
   renderPeriodPresets();
   await loadResults();
 }
@@ -245,6 +270,12 @@ function formatRawTime(textValue, timeValue) {
   return timeValue ? String(timeValue).slice(0, 5) : "-";
 }
 
+function selectedDateRangeText() {
+  const start = startDateInput.value || yearStartText();
+  const end = endDateInput.value || localDateText();
+  return start === end ? start : `${start} ~ ${end}`;
+}
+
 function classLabel(grade, classNo) {
   return `${grade}-${classNo}반`;
 }
@@ -253,6 +284,21 @@ function selectedClassNo() {
   const value = classFilter.value;
   if (!value || value === "all") return null;
   return Number(value);
+}
+
+function selectedClassScope() {
+  const classNo = selectedClassNo();
+  if (!classNo) return null;
+  const sample = visibleStudents()[0] || teacherClasses.find((item) => Number(item.class_no) === classNo);
+  return {
+    grade: Number(sample?.grade || teacherClasses[0]?.grade || 2),
+    classNo,
+  };
+}
+
+function activeClassRecordScope() {
+  if (selectedRankingClass) return selectedRankingClass;
+  return selectedClassScope();
 }
 
 function visibleStudents() {
@@ -280,6 +326,13 @@ function resultSort(a, b) {
   const dateCompare = String(b.result_date).localeCompare(String(a.result_date));
   if (dateCompare) return dateCompare;
   return studentSort(a.student || {}, b.student || {});
+}
+
+function classDetailSort(a, b) {
+  const statusOrder = { needs_check: 0, excused: 1 };
+  const statusCompare = (statusOrder[a.status] ?? 9) - (statusOrder[b.status] ?? 9);
+  if (statusCompare) return statusCompare;
+  return resultSort(a, b);
 }
 
 function renderScope() {
@@ -689,10 +742,11 @@ function selectSummaryClass(button) {
     grade: Number(button.dataset.summaryGrade),
     classNo: Number(button.dataset.summaryClassNo),
   };
+  selectedStudentId = null;
   resetRankingVisibleLimit();
   isRankingPanelOpen = false;
   renderAll();
-  rankingPanel.scrollIntoView({ behavior: "smooth", block: "start" });
+  classDetailPanel.scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
 function clearSelectedStudent() {
@@ -729,6 +783,65 @@ function closePasswordDialog() {
   resetPasswordDialog();
 }
 
+function recordTableRowsHtml(rows) {
+  return rows.slice(0, 500).map((row) => {
+    const student = row.student || {};
+    const certificate = resolvedCertificate(row);
+    return `
+      <tr>
+        <td>${escapeHtml(row.result_date)}</td>
+        <td>${escapeHtml(classLabel(student.grade || "-", student.class_no || "-"))}</td>
+        <td class="num">${escapeHtml(student.student_no || "-")}</td>
+        <td class="student-name">${escapeHtml(student.name || "-")}</td>
+        <td><span class="${statusClass(row.status)}">${escapeHtml(formatStatus(row.status))}</span></td>
+        <td><span class="${certificateClass(certificate)}">${escapeHtml(formatCertificate(certificate))}</span></td>
+        <td>${escapeHtml(row.absence_periods || "-")}</td>
+        <td>${escapeHtml(row.ksos_reason || "-")}</td>
+        <td>${escapeHtml(formatRawTime(row.ksos_from_text, row.outing_from))}</td>
+        <td>${escapeHtml(formatRawTime(row.ksos_to_text, row.outing_to))}</td>
+        <td>${escapeHtml(row.teacher_name || "-")}</td>
+      </tr>
+    `;
+  }).join("");
+}
+
+function renderClassDetail(results) {
+  const scope = activeClassRecordScope();
+  const showPanel = Boolean(scope);
+  classDetailPanel.classList.toggle("hidden", !showPanel);
+  classDetailBody.innerHTML = "";
+  classDetailTableWrap.classList.add("hidden");
+  classDetailEmpty.classList.add("hidden");
+
+  if (!showPanel) return;
+
+  const label = classLabel(scope.grade, scope.classNo);
+  const rows = results
+    .filter((row) => (
+      Number(row.student?.grade) === Number(scope.grade) &&
+      Number(row.student?.class_no) === Number(scope.classNo)
+    ))
+    .sort(classDetailSort);
+  const needs = rows.filter((row) => row.status === "needs_check").length;
+  const excused = rows.filter((row) => row.status === "excused").length;
+
+  classDetailTitle.textContent = `${label} 상세 내역`;
+  classDetailMeta.textContent = `${selectedDateRangeText()} · 확인 필요 ${needs}건 · 외출 확인 ${excused}건 · 합계 ${rows.length}건`;
+
+  if (!rows.length) {
+    classDetailEmpty.textContent = `${label}의 조회 기록이 없습니다.`;
+    classDetailEmpty.classList.remove("hidden");
+    return;
+  }
+
+  classDetailTableWrap.classList.remove("hidden");
+  classDetailBody.innerHTML = recordTableRowsHtml(rows);
+
+  if (rows.length > 500) {
+    classDetailMeta.textContent = `${selectedDateRangeText()} · ${rows.length}건 중 최근 500건 표시`;
+  }
+}
+
 function renderRecords(results) {
   const selected = selectedStudent();
   recordsBody.innerHTML = "";
@@ -752,7 +865,7 @@ function renderRecords(results) {
   const excused = sorted.filter((row) => row.status === "excused").length;
 
   recordsTitle.textContent = `${selected.name} 상세 기록`;
-  recordsMeta.textContent = `${classLabel(selected.grade, selected.class_no)} ${selected.student_no}번 · ${startDateInput.value || yearStartText()} ~ ${endDateInput.value || localDateText()} · ${sorted.length}건`;
+  recordsMeta.textContent = `${classLabel(selected.grade, selected.class_no)} ${selected.student_no}번 · ${selectedDateRangeText()} · ${sorted.length}건`;
   clearSelectedStudentButton.classList.remove("hidden");
   selectedStudentSummary.classList.remove("hidden");
   selectedStudentSummary.innerHTML = `
@@ -810,6 +923,7 @@ function renderAll() {
   renderSummary(results);
   renderRanking(results);
   renderClassSummary(results);
+  renderClassDetail(results);
   renderRecords(results);
 }
 
@@ -971,6 +1085,8 @@ logoutButton.addEventListener("click", async () => {
   classSummaryChart.innerHTML = "";
   classSummaryBody.innerHTML = "";
   recordsBody.innerHTML = "";
+  classDetailBody.innerHTML = "";
+  classDetailPanel.classList.add("hidden");
   renderSummary([]);
   showLogin();
 });
@@ -995,6 +1111,14 @@ periodPresetGroup.addEventListener("click", async (event) => {
 
 startDateInput.addEventListener("change", syncPeriodPreset);
 endDateInput.addEventListener("change", syncPeriodPreset);
+
+singleDateInput.addEventListener("change", async () => {
+  try {
+    await applySingleDate();
+  } catch (error) {
+    setMessage(appMessage, error.message || "데이터를 불러오지 못했습니다.");
+  }
+});
 
 studentListButton.addEventListener("click", openStudentDialog);
 

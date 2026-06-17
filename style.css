@@ -270,6 +270,10 @@ select:disabled {
   min-width: 160px;
 }
 
+.single-date-label {
+  min-width: 170px;
+}
+
 .summary-grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -698,6 +702,14 @@ select:disabled {
   min-width: 520px;
 }
 
+.class-detail-panel .table-wrap table {
+  min-width: 980px;
+}
+
+.homeroom-view .class-summary-table-wrap {
+  display: none;
+}
+
 .class-summary-chart {
   display: grid;
   grid-template-columns: repeat(5, minmax(118px, 1fr));
@@ -1097,6 +1109,7 @@ tbody tr:last-child td {
 
   .select-label,
   .period-label,
+  .single-date-label,
   .date-label {
     min-width: 100%;
   }
