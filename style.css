@@ -905,10 +905,15 @@ tbody tr:last-child td {
 }
 
 .class-detail-panel .table-wrap th,
-.class-detail-panel .table-wrap td,
-#recordsTableWrap th,
-#recordsTableWrap td {
+#recordsTableWrap th {
   white-space: nowrap;
+}
+
+.class-detail-panel .table-wrap td,
+#recordsTableWrap td {
+  overflow-wrap: anywhere;
+  word-break: keep-all;
+  line-height: 1.45;
 }
 
 .class-detail-panel .table-wrap th:nth-child(1),
@@ -961,11 +966,29 @@ tbody tr:last-child td {
   width: 136px;
 }
 
+.class-detail-panel .table-wrap td:nth-child(1),
+.class-detail-panel .table-wrap td:nth-child(2),
+.class-detail-panel .table-wrap td:nth-child(3),
+.class-detail-panel .table-wrap td:nth-child(4),
+.class-detail-panel .table-wrap td:nth-child(5),
+.class-detail-panel .table-wrap td:nth-child(6),
+.class-detail-panel .table-wrap td:nth-child(7),
+#recordsTableWrap td:nth-child(1),
+#recordsTableWrap td:nth-child(2),
+#recordsTableWrap td:nth-child(3),
+#recordsTableWrap td:nth-child(4),
+#recordsTableWrap td:nth-child(5),
+#recordsTableWrap td:nth-child(6),
+#recordsTableWrap td:nth-child(7) {
+  white-space: nowrap;
+  overflow-wrap: normal;
+}
+
 .class-detail-panel .table-wrap th:nth-child(8),
 .class-detail-panel .table-wrap td:nth-child(8),
 #recordsTableWrap th:nth-child(8),
 #recordsTableWrap td:nth-child(8) {
-  width: 104px;
+  width: 128px;
 }
 
 .class-detail-panel .table-wrap th:nth-child(9),
