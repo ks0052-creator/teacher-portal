@@ -243,11 +243,19 @@ function hasTeacherSplitColumns(row) {
     Object.prototype.hasOwnProperty.call(row || {}, "ksos_teacher_name");
 }
 
+function cleanTeacherDisplayName(value) {
+  return String(value || "")
+    .split(",")
+    .map((name) => name.trim().replace(/\s*수정$/u, "").trim())
+    .filter(Boolean)
+    .join(", ");
+}
+
 function riroTeacherName(row) {
   const explicit = String(row?.riro_teacher_name || "").trim();
-  if (explicit) return explicit;
+  if (explicit) return cleanTeacherDisplayName(explicit);
   if (hasTeacherSplitColumns(row)) return "";
-  return hasKsosOutingData(row) ? "" : String(row?.teacher_name || "").trim();
+  return hasKsosOutingData(row) ? "" : cleanTeacherDisplayName(row?.teacher_name);
 }
 
 function ksosTeacherName(row) {
